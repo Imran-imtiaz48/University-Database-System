@@ -295,3 +295,163 @@ CREATE TABLE Donations (
     Purpose VARCHAR(255),
     FOREIGN KEY (AlumniID) REFERENCES Alumni(AlumniID)
 );
+
+-- Stored Procedure to Enroll a Student in a Course
+CREATE PROCEDURE EnrollStudentInCourse
+    @StudentID INT,
+    @CourseID INT,
+    @EnrollmentDate DATE
+AS
+BEGIN
+    DECLARE @HasPrerequisites BIT;
+
+    -- Check if the student has completed all prerequisites
+    SELECT @HasPrerequisites = CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM Prerequisites p
+            LEFT JOIN StudentsCourses sc ON p.PrerequisiteCourseID = sc.CourseID AND sc.StudentID = @StudentID
+            WHERE p.CourseID = @CourseID AND (sc.Grade IS NULL OR sc.Grade IN ('F', 'D', 'D+'))
+        )
+        THEN 0
+        ELSE 1
+    END;
+
+    IF @HasPrerequisites = 1
+    BEGIN
+        INSERT INTO Enrollments (StudentID, CourseID, EnrollmentDate)
+        VALUES (@StudentID, @CourseID, @EnrollmentDate);
+        PRINT 'Student enrolled successfully.';
+    END
+    ELSE
+    BEGIN
+        PRINT 'Student does not meet the prerequisites for this course.';
+    END
+END;
+GO
+
+-- Stored Procedure to Calculate GPA for a Student
+CREATE PROCEDURE CalculateStudentGPA
+    @StudentID INT
+AS
+BEGIN
+    DECLARE @GPA FLOAT;
+
+    SELECT @GPA = AVG(CASE
+        WHEN Grade = 'A' THEN 4.0
+        WHEN Grade = 'A-' THEN 3.7
+        WHEN Grade = 'B+' THEN 3.3
+        WHEN Grade = 'B' THEN 3.0
+        WHEN Grade = 'B-' THEN 2.7
+        WHEN Grade = 'C+' THEN 2.3
+        WHEN Grade = 'C' THEN 2.0
+        WHEN Grade = 'C-' THEN 1.7
+        WHEN Grade = 'D+' THEN 1.3
+        WHEN Grade = 'D' THEN 1.0
+        WHEN Grade = 'F' THEN 0.0
+        ELSE NULL
+    END)
+    FROM Enrollments
+    WHERE StudentID = @StudentID;
+
+    SELECT @GPA AS GPA;
+END;
+GO
+
+ -- Stored Procedure to Assign Instructor to a Course
+ CREATE PROCEDURE AssignInstructorToCourse
+    @InstructorID INT,
+    @CourseID INT,
+    @AssignmentDate DATE
+AS
+BEGIN
+    DECLARE @InstructorAvailable BIT;
+
+    -- Check if the instructor is already assigned to another course at the same time
+    SELECT @InstructorAvailable = CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM CourseAssignments ca
+            JOIN CourseSchedules cs ON ca.CourseID = cs.CourseID
+            WHERE ca.InstructorID = @InstructorID
+            AND cs.DayOfWeek IN (
+                SELECT cs2.DayOfWeek
+                FROM CourseSchedules cs2
+                WHERE cs2.CourseID = @CourseID
+            )
+            AND cs.StartTime <= (SELECT EndTime FROM CourseSchedules WHERE CourseID = @CourseID)
+            AND cs.EndTime >= (SELECT StartTime FROM CourseSchedules WHERE CourseID = @CourseID)
+        )
+        THEN 0
+        ELSE 1
+    END;
+
+    IF @InstructorAvailable = 1
+    BEGIN
+        INSERT INTO CourseAssignments (CourseID, InstructorID, AssignmentDate)
+        VALUES (@CourseID, @InstructorID, @AssignmentDate);
+        PRINT 'Instructor assigned to the course successfully.';
+    END
+    ELSE
+    BEGIN
+        PRINT 'Instructor is not available at the scheduled times for this course.';
+    END
+END;
+GO
+
+-- Stored Procedure to Get Student Transcript
+CREATE PROCEDURE GetStudentTranscript
+    @StudentID INT
+AS
+BEGIN
+    SELECT 
+        c.CourseName,
+        c.Credits,
+        e.Grade,
+        e.EnrollmentDate,
+        d.DegreeName
+    FROM Enrollments e
+    JOIN Courses c ON e.CourseID = c.CourseID
+    LEFT JOIN DegreeRequirements dr ON c.CourseID = dr.CourseID
+    LEFT JOIN Degrees d ON dr.DegreeID = d.DegreeID
+    WHERE e.StudentID = @StudentID
+    ORDER BY e.EnrollmentDate;
+END;
+GO
+
+-- Stored Procedure to Award Scholarship to Student
+CREATE PROCEDURE AwardScholarship
+    @ScholarshipID INT,
+    @StudentID INT,
+    @AwardDate DATE
+AS
+BEGIN
+    DECLARE @Eligibility BIT;
+
+    -- Check if the student meets the eligibility criteria
+    SELECT @Eligibility = CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM ScholarshipApplications sa
+            JOIN Scholarships s ON sa.ScholarshipID = s.ScholarshipID
+            WHERE sa.StudentID = @StudentID
+            AND sa.ScholarshipID = @ScholarshipID
+            AND sa.Status = 'Approved'
+        )
+        THEN 1
+        ELSE 0
+    END;
+
+    IF @Eligibility = 1
+    BEGIN
+        -- Award the scholarship
+        INSERT INTO ScholarshipApplications (ScholarshipID, StudentID, ApplicationDate, Status)
+        VALUES (@ScholarshipID, @StudentID, @AwardDate, 'Awarded');
+        PRINT 'Scholarship awarded successfully.';
+    END
+    ELSE
+    BEGIN
+        PRINT 'Student does not meet the eligibility criteria for this scholarship.';
+    END
+END;
+GO

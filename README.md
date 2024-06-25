@@ -42,8 +42,10 @@ To use this repository, follow these steps:
 1.	Clone the Repository: Clone this repository to your local machine.
 
 git clone https://github.com/your-username/university-database.git
-3.	Set Up the Database: Execute the SQL scripts in your preferred SQL Server management tool to create the database schema and populate it with sample data (if available).
-4.	Interact with the Database: Use SQL queries to interact with the database tables and execute stored procedures as needed for university operations.
+
+2.	Set Up the Database: Execute the SQL scripts in your preferred SQL Server management tool to create the database schema and populate it with sample data (if available).
+3.	Interact with the Database: Use SQL queries to interact with the database tables and execute stored procedures as needed for university operations.
+
 Contributing
 Contributions to improve and expand the functionality of this university database are welcome. Fork the repository, make your changes, and submit a pull request outlining your modifications.
 

@@ -193,3 +193,105 @@ CREATE TABLE ScholarshipApplications (
     FOREIGN KEY (ScholarshipID) REFERENCES Scholarships(ScholarshipID),
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
 );
+-- Create the LibraryBooks table
+CREATE TABLE LibraryBooks (
+    BookID INT IDENTITY(1,1) PRIMARY KEY,
+    Title VARCHAR(255) NOT NULL,
+    Author VARCHAR(255),
+    ISBN VARCHAR(20) UNIQUE,
+    PublicationYear INT,
+    CopiesAvailable INT NOT NULL
+);
+
+-- Create the BookLoans table
+CREATE TABLE BookLoans (
+    LoanID INT IDENTITY(1,1) PRIMARY KEY,
+    BookID INT,
+    StudentID INT,
+    LoanDate DATE NOT NULL,
+    DueDate DATE NOT NULL,
+    ReturnDate DATE,
+    FOREIGN KEY (BookID) REFERENCES LibraryBooks(BookID),
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
+);
+
+-- Create the Clubs table
+CREATE TABLE Clubs (
+    ClubID INT IDENTITY(1,1) PRIMARY KEY,
+    ClubName VARCHAR(100) NOT NULL,
+    Description TEXT,
+    PresidentID INT,
+    FOREIGN KEY (PresidentID) REFERENCES Students(StudentID)
+);
+
+-- Create the ClubMemberships table
+CREATE TABLE ClubMemberships (
+    MembershipID INT IDENTITY(1,1) PRIMARY KEY,
+    ClubID INT,
+    StudentID INT,
+    JoinDate DATE NOT NULL,
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
+);
+
+-- Create the Faculty table
+CREATE TABLE Faculty (
+    FacultyID INT IDENTITY(1,1) PRIMARY KEY,
+    FacultyName VARCHAR(100) NOT NULL,
+    DeanID INT,
+    FOREIGN KEY (DeanID) REFERENCES Instructors(InstructorID)
+);
+
+-- Create the DepartmentsFaculty table (many-to-many relationship between Departments and Faculty)
+CREATE TABLE DepartmentsFaculty (
+    DepartmentFacultyID INT IDENTITY(1,1) PRIMARY KEY,
+    DepartmentID INT,
+    FacultyID INT,
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID),
+    FOREIGN KEY (FacultyID) REFERENCES Faculty(FacultyID)
+);
+
+-- Create the ResearchProjects table
+CREATE TABLE ResearchProjects (
+    ProjectID INT IDENTITY(1,1) PRIMARY KEY,
+    ProjectName VARCHAR(255) NOT NULL,
+    StartDate DATE NOT NULL,
+    EndDate DATE,
+    Budget DECIMAL(15, 2),
+    DepartmentID INT,
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
+);
+
+-- Create the ResearchTeamMembers table
+CREATE TABLE ResearchTeamMembers (
+    TeamMemberID INT IDENTITY(1,1) PRIMARY KEY,
+    ProjectID INT,
+    InstructorID INT,
+    Role VARCHAR(100) NOT NULL,  -- e.g., Principal Investigator, Co-Investigator
+    FOREIGN KEY (ProjectID) REFERENCES ResearchProjects(ProjectID),
+    FOREIGN KEY (InstructorID) REFERENCES Instructors(InstructorID)
+);
+
+-- Create the Alumni table
+CREATE TABLE Alumni (
+    AlumniID INT IDENTITY(1,1) PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    GraduationYear INT NOT NULL,
+    DegreeID INT,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    Phone VARCHAR(20),
+    Address VARCHAR(255),
+    EmploymentStatus VARCHAR(100),
+    FOREIGN KEY (DegreeID) REFERENCES Degrees(DegreeID)
+);
+
+-- Create the Donations table
+CREATE TABLE Donations (
+    DonationID INT IDENTITY(1,1) PRIMARY KEY,
+    AlumniID INT,
+    Amount DECIMAL(10, 2) NOT NULL,
+    DonationDate DATE NOT NULL,
+    Purpose VARCHAR(255),
+    FOREIGN KEY (AlumniID) REFERENCES Alumni(AlumniID)
+);

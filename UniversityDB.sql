@@ -174,3 +174,22 @@ CREATE TABLE EventAttendees (
     FOREIGN KEY (EventID) REFERENCES Events(EventID),
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
 );
+-- Create the Scholarships table
+CREATE TABLE Scholarships (
+    ScholarshipID INT IDENTITY(1,1) PRIMARY KEY,
+    ScholarshipName VARCHAR(100) NOT NULL,
+    Amount DECIMAL(10, 2) NOT NULL,
+    EligibilityCriteria TEXT,
+    ApplicationDeadline DATE
+);
+
+-- Create the ScholarshipApplications table
+CREATE TABLE ScholarshipApplications (
+    ApplicationID INT IDENTITY(1,1) PRIMARY KEY,
+    ScholarshipID INT,
+    StudentID INT,
+    ApplicationDate DATE NOT NULL,
+    Status VARCHAR(50) NOT NULL,  -- e.g., Pending, Approved, Rejected
+    FOREIGN KEY (ScholarshipID) REFERENCES Scholarships(ScholarshipID),
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
+);

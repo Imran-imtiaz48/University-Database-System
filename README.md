@@ -1,4 +1,5 @@
 University Database
+
 This repository contains the schema and SQL scripts for a comprehensive university database. The database is designed to manage various aspects of university operations, including students, courses, departments, instructors, enrollments, and more.
 Database Structure
 The database schema consists of the following tables:

@@ -211,3 +211,213 @@ BEGIN
 END;
 GO
 
+-- Stored Procedure to Add a New Course with Prerequisites
+CREATE PROCEDURE AddCourseWithPrerequisites
+    @CourseName VARCHAR(100),
+    @CourseDescription TEXT,
+    @Credits INT,
+    @DepartmentID INT,
+    @Prerequisites TABLE (PrerequisiteCourseID INT)
+AS
+BEGIN
+    DECLARE @CourseID INT;
+
+    -- Insert new course
+    INSERT INTO Courses (CourseName, CourseDescription, Credits, DepartmentID)
+    VALUES (@CourseName, @CourseDescription, @Credits, @DepartmentID);
+
+    -- Get the new CourseID
+    SET @CourseID = SCOPE_IDENTITY();
+
+    -- Insert prerequisites
+    INSERT INTO Prerequisites (CourseID, PrerequisiteCourseID)
+    SELECT @CourseID, PrerequisiteCourseID
+    FROM @Prerequisites;
+END;
+GO
+
+-- Stored Procedure to Retrieve Course Enrollment Details
+CREATE PROCEDURE GetCourseEnrollmentDetails
+    @CourseID INT
+AS
+BEGIN
+    SELECT 
+        s.StudentID,
+        s.FirstName,
+        s.LastName,
+        e.EnrollmentDate,
+        e.Grade
+    FROM Enrollments e
+    JOIN Students s ON e.StudentID = s.StudentID
+    WHERE e.CourseID = @CourseID
+    ORDER BY s.LastName, s.FirstName;
+END;
+GO
+
+-- Stored Procedure to Update Student Information
+CREATE PROCEDURE UpdateStudentInfo
+    @StudentID INT,
+    @FirstName VARCHAR(50),
+    @LastName VARCHAR(50),
+    @DateOfBirth DATE,
+    @Gender VARCHAR(10),
+    @Email VARCHAR(100),
+    @Phone VARCHAR(20),
+    @Address VARCHAR(255)
+AS
+BEGIN
+    UPDATE Students
+    SET
+        FirstName = @FirstName,
+        LastName = @LastName,
+        DateOfBirth = @DateOfBirth,
+        Gender = @Gender,
+        Email = @Email,
+        Phone = @Phone,
+        Address = @Address
+    WHERE StudentID = @StudentID;
+END;
+GO
+
+-- Stored Procedure to Retrieve Course Prerequisites
+CREATE PROCEDURE GetCoursePrerequisites
+    @CourseID INT
+AS
+BEGIN
+    SELECT 
+        p.PrerequisiteCourseID,
+        c.CourseName
+    FROM Prerequisites p
+    JOIN Courses c ON p.PrerequisiteCourseID = c.CourseID
+    WHERE p.CourseID = @CourseID;
+END;
+GO
+
+-- Stored Procedure to Generate Department Report
+CREATE PROCEDURE GenerateDepartmentReport
+    @DepartmentID INT
+AS
+BEGIN
+    -- Department Courses
+    SELECT 
+        CourseID,
+        CourseName,
+        Credits
+    FROM Courses
+    WHERE DepartmentID = @DepartmentID;
+
+    -- Department Instructors
+    SELECT 
+        i.InstructorID,
+        i.FirstName,
+        i.LastName,
+        i.Email
+    FROM Instructors i
+    JOIN DepartmentsInstructors di ON i.InstructorID = di.InstructorID
+    WHERE di.DepartmentID = @DepartmentID;
+
+    -- Department Average Grade
+    DECLARE @AverageGrade FLOAT;
+    SELECT @AverageGrade = AVG(CASE
+        WHEN Grade = 'A' THEN 4.0
+        WHEN Grade = 'A-' THEN 3.7
+        WHEN Grade = 'B+' THEN 3.3
+        WHEN Grade = 'B' THEN 3.0
+        WHEN Grade = 'B-' THEN 2.7
+        WHEN Grade = 'C+' THEN 2.3
+        WHEN Grade = 'C' THEN 2.0
+        WHEN Grade = 'C-' THEN 1.7
+        WHEN Grade = 'D+' THEN 1.3
+        WHEN Grade = 'D' THEN 1.0
+        WHEN Grade = 'F' THEN 0.0
+        ELSE NULL
+    END)
+    FROM Enrollments e
+    JOIN Students s ON e.StudentID = s.StudentID
+    WHERE s.DepartmentID = @DepartmentID;
+
+    SELECT @AverageGrade AS DepartmentAverageGrade;
+END;
+GO
+
+-- Stored Procedure to Assign Student to Club
+
+CREATE PROCEDURE AssignStudentToClub
+    @StudentID INT,
+    @ClubID INT,
+    @MembershipDate DATE
+AS
+BEGIN
+    DECLARE @IsMember BIT;
+
+    -- Check if the student is already a member
+    SELECT @IsMember = CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM ClubMemberships
+            WHERE StudentID = @StudentID AND ClubID = @ClubID
+        )
+        THEN 1
+        ELSE 0
+    END;
+
+    IF @IsMember = 0
+    BEGIN
+        -- Assign student to the club
+        INSERT INTO ClubMemberships (StudentID, ClubID, MembershipDate)
+        VALUES (@StudentID, @ClubID, @MembershipDate);
+        PRINT 'Student assigned to the club successfully.';
+    END
+    ELSE
+    BEGIN
+        PRINT 'Student is already a member of this club.';
+    END
+END;
+GO
+
+-- Stored Procedure to Retrieve Alumni Donations
+
+CREATE PROCEDURE GetAlumniDonations
+    @AlumniID INT
+AS
+BEGIN
+    SELECT 
+        DonationID,
+        DonationAmount,
+        DonationDate,
+        Purpose
+    FROM Donations
+    WHERE AlumniID = @AlumniID
+    ORDER BY DonationDate;
+END;
+GO
+
+-- Stored Procedure to Calculate Course Completion Rate
+
+CREATE PROCEDURE CalculateCourseCompletionRate
+    @CourseID INT
+AS
+BEGIN
+    DECLARE @TotalEnrolled INT;
+    DECLARE @TotalCompleted INT;
+    DECLARE @CompletionRate FLOAT;
+
+    -- Total students enrolled
+    SELECT @TotalEnrolled = COUNT(*)
+    FROM Enrollments
+    WHERE CourseID = @CourseID;
+
+    -- Total students completed (assuming grades other than 'F' are considered as completed)
+    SELECT @TotalCompleted = COUNT(*)
+    FROM Enrollments
+    WHERE CourseID = @CourseID AND Grade <> 'F';
+
+    -- Calculate completion rate
+    SET @CompletionRate = CASE
+        WHEN @TotalEnrolled = 0 THEN 0
+        ELSE CAST(@TotalCompleted AS FLOAT) / @TotalEnrolled * 100
+    END;
+
+    SELECT @CompletionRate AS CompletionRate;
+END;
+GO

@@ -421,3 +421,57 @@ BEGIN
     SELECT @CompletionRate AS CompletionRate;
 END;
 GO
+
+-- Stored Procedure to Calculate Instructor Workload
+CREATE PROCEDURE CalculateInstructorWorkload
+    @InstructorID INT,
+    @Semester VARCHAR(20)
+AS
+BEGIN
+    SELECT 
+        i.InstructorID,
+        i.FirstName,
+        i.LastName,
+        COUNT(ca.CourseID) AS TotalCourses
+    FROM Instructors i
+    JOIN CourseAssignments ca ON i.InstructorID = ca.InstructorID
+    JOIN Courses c ON ca.CourseID = c.CourseID
+    JOIN CourseSchedules cs ON c.CourseID = cs.CourseID
+    WHERE i.InstructorID = @InstructorID
+      AND cs.Semester = @Semester
+    GROUP BY i.InstructorID, i.FirstName, i.LastName;
+END;
+GO
+
+-- Stored Procedure to Generate Course Attendance Report
+CREATE PROCEDURE GenerateCourseAttendanceReport
+    @CourseID INT
+AS
+BEGIN
+    SELECT 
+        s.StudentID,
+        s.FirstName,
+        s.LastName,
+        a.AttendanceDate,
+        a.Status
+    FROM Attendance a
+    JOIN Students s ON a.StudentID = s.StudentID
+    WHERE a.CourseID = @CourseID
+    ORDER BY s.LastName, s.FirstName, a.AttendanceDate;
+END;
+GO
+
+-- Stored Procedure to Update Instructor Contact Information
+CREATE PROCEDURE UpdateInstructorContactInfo
+    @InstructorID INT,
+    @Email VARCHAR(100),
+    @Phone VARCHAR(20)
+AS
+BEGIN
+    UPDATE Instructors
+    SET
+        Email = @Email,
+        Phone = @Phone
+    WHERE InstructorID = @InstructorID;
+END;
+GO

@@ -475,3 +475,167 @@ BEGIN
     WHERE InstructorID = @InstructorID;
 END;
 GO
+
+-- Stored Procedure to Retrieve Library Book Loan History
+CREATE PROCEDURE GetBookLoanHistory
+    @BookID INT
+AS
+BEGIN
+    SELECT 
+        bl.LoanID,
+        s.StudentID,
+        s.FirstName,
+        s.LastName,
+        bl.LoanDate,
+        bl.ReturnDate,
+        bl.Status
+    FROM BookLoans bl
+    JOIN Students s ON bl.StudentID = s.StudentID
+    WHERE bl.BookID = @BookID
+    ORDER BY bl.LoanDate;
+END;
+GO
+
+-- Stored Procedure to Calculate Scholarship Distribution
+CREATE PROCEDURE CalculateScholarshipDistribution
+AS
+BEGIN
+    SELECT 
+        d.DepartmentID,
+        d.DepartmentName,
+        SUM(sch.Amount) AS TotalScholarshipAmount
+    FROM Scholarships sch
+    JOIN ScholarshipApplications sa ON sch.ScholarshipID = sa.ScholarshipID
+    JOIN Students s ON sa.StudentID = s.StudentID
+    JOIN Departments d ON s.DepartmentID = d.DepartmentID
+    WHERE sa.Status = 'Awarded'
+    GROUP BY d.DepartmentID, d.DepartmentName
+    ORDER BY TotalScholarshipAmount DESC;
+END;
+GO
+
+-- Stored Procedure to Assign Faculty to Research Project
+CREATE PROCEDURE AssignFacultyToResearchProject
+    @FacultyID INT,
+    @ProjectID INT
+AS
+BEGIN
+    DECLARE @HasConflict BIT;
+
+    -- Check for scheduling conflicts
+    SELECT @HasConflict = CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM ResearchTeamMembers rtm
+            JOIN ResearchProjects rp ON rtm.ProjectID = rp.ProjectID
+            WHERE rtm.FacultyID = @FacultyID
+              AND rp.ProjectID = @ProjectID
+        )
+        THEN 1
+        ELSE 0
+    END;
+
+    IF @HasConflict = 0
+    BEGIN
+        INSERT INTO ResearchTeamMembers (FacultyID, ProjectID)
+        VALUES (@FacultyID, @ProjectID);
+        PRINT 'Faculty member assigned to research project successfully.';
+    END
+    ELSE
+    BEGIN
+        PRINT 'Scheduling conflict detected. Cannot assign faculty member to this research project.';
+    END
+END;
+GO
+
+-- Stored Procedure to Generate Instructor Performance Report
+CREATE PROCEDURE GenerateInstructorPerformanceReport
+    @InstructorID INT
+AS
+BEGIN
+    -- Instructor Details
+    SELECT 
+        FirstName,
+        LastName,
+        Email,
+        Phone,
+        HireDate
+    FROM Instructors
+    WHERE InstructorID = @InstructorID;
+
+    -- Course Feedback and Ratings
+    SELECT 
+        c.CourseName,
+        f.FeedbackDate,
+        f.Comments,
+        f.Rating
+    FROM Feedback f
+    JOIN Courses c ON f.CourseID = c.CourseID
+    WHERE f.InstructorID = @InstructorID
+    ORDER BY f.FeedbackDate;
+
+    -- Average Rating
+    DECLARE @AverageRating FLOAT;
+    SELECT @AverageRating = AVG(f.Rating)
+    FROM Feedback f
+    WHERE f.InstructorID = @InstructorID;
+
+    SELECT @AverageRating AS AverageRating;
+END;
+GO
+
+
+-- Stored Procedure to Assign Student Advisor
+CREATE PROCEDURE AssignStudentAdvisor
+    @StudentID INT,
+    @FacultyID INT
+AS
+BEGIN
+    -- Check if the student already has an advisor
+    IF EXISTS (SELECT 1 FROM StudentAdvisors WHERE StudentID = @StudentID)
+    BEGIN
+        -- Update the existing advisor
+        UPDATE StudentAdvisors
+        SET FacultyID = @FacultyID
+        WHERE StudentID = @StudentID;
+        PRINT 'Student advisor updated successfully.';
+    END
+    ELSE
+    BEGIN
+        -- Assign a new advisor
+        INSERT INTO StudentAdvisors (StudentID, FacultyID)
+        VALUES (@StudentID, @FacultyID);
+        PRINT 'Student advisor assigned successfully.';
+    END
+END;
+GO
+
+-- Stored Procedure to Generate Alumni Employment Report
+CREATE PROCEDURE GenerateAlumniEmploymentReport
+AS
+BEGIN
+    SELECT 
+        a.AlumniID,
+        a.FirstName,
+        a.LastName,
+        e.EmployerName,
+        e.Position,
+        e.StartDate,
+        e.Salary
+    FROM Alumni a
+    JOIN Employment e ON a.AlumniID = e.AlumniID
+    ORDER BY a.LastName, a.FirstName;
+END;
+GO
+
+-- Stored Procedure to Update Course Credits
+CREATE PROCEDURE UpdateCourseCredits
+    @CourseID INT,
+    @NewCredits INT
+AS
+BEGIN
+    UPDATE Courses
+    SET Credits = @NewCredits
+    WHERE CourseID = @CourseID;
+END;
+GO

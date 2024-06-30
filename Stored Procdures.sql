@@ -639,3 +639,246 @@ BEGIN
     WHERE CourseID = @CourseID;
 END;
 GO
+
+-- Stored Procedure to Generate Class Roster
+CREATE PROCEDURE GenerateClassRoster
+    @CourseID INT
+AS
+BEGIN
+    SELECT 
+        s.StudentID,
+        s.FirstName,
+        s.LastName,
+        s.Email,
+        s.Phone
+    FROM Enrollments e
+    JOIN Students s ON e.StudentID = s.StudentID
+    WHERE e.CourseID = @CourseID
+    ORDER BY s.LastName, s.FirstName;
+END;
+GO
+
+-- Stored Procedure to Generate Faculty Research Report
+CREATE PROCEDURE GenerateFacultyResearchReport
+    @FacultyID INT
+AS
+BEGIN
+    SELECT 
+        rp.ProjectID,
+        rp.ProjectName,
+        rp.StartDate,
+        rp.EndDate,
+        rp.Status
+    FROM ResearchTeamMembers rtm
+    JOIN ResearchProjects rp ON rtm.ProjectID = rp.ProjectID
+    WHERE rtm.FacultyID = @FacultyID
+    ORDER BY rp.StartDate;
+END;
+GO
+
+-- Stored Procedure to Retrieve Student's Academic Transcript
+CREATE PROCEDURE GetStudentTranscript
+    @StudentID INT
+AS
+BEGIN
+    SELECT 
+        c.CourseName,
+        e.EnrollmentDate,
+        e.Grade,
+        c.Credits
+    FROM Enrollments e
+    JOIN Courses c ON e.CourseID = c.CourseID
+    WHERE e.StudentID = @StudentID
+    ORDER BY e.EnrollmentDate;
+
+    -- Calculate GPA
+    DECLARE @TotalCredits INT;
+    DECLARE @TotalPoints FLOAT;
+    DECLARE @GPA FLOAT;
+
+    SELECT 
+        @TotalCredits = SUM(c.Credits),
+        @TotalPoints = SUM(CASE
+            WHEN e.Grade = 'A' THEN 4.0 * c.Credits
+            WHEN e.Grade = 'A-' THEN 3.7 * c.Credits
+            WHEN e.Grade = 'B+' THEN 3.3 * c.Credits
+            WHEN e.Grade = 'B' THEN 3.0 * c.Credits
+            WHEN e.Grade = 'B-' THEN 2.7 * c.Credits
+            WHEN e.Grade = 'C+' THEN 2.3 * c.Credits
+            WHEN e.Grade = 'C' THEN 2.0 * c.Credits
+            WHEN e.Grade = 'C-' THEN 1.7 * c.Credits
+            WHEN e.Grade = 'D+' THEN 1.3 * c.Credits
+            WHEN e.Grade = 'D' THEN 1.0 * c.Credits
+            WHEN e.Grade = 'F' THEN 0.0 * c.Credits
+            ELSE 0.0
+        END)
+    FROM Enrollments e
+    JOIN Courses c ON e.CourseID = c.CourseID
+    WHERE e.StudentID = @StudentID;
+
+    SET @GPA = CASE
+        WHEN @TotalCredits = 0 THEN 0
+        ELSE @TotalPoints / @TotalCredits
+    END;
+
+    SELECT @GPA AS GPA;
+END;
+GO
+
+-- Stored Procedure to Assign Multiple Students to a Course
+CREATE PROCEDURE AssignStudentsToCourse
+    @CourseID INT,
+    @StudentIDs dbo.IntList READONLY,
+    @EnrollmentDate DATE
+AS
+BEGIN
+    INSERT INTO Enrollments (StudentID, CourseID, EnrollmentDate)
+    SELECT StudentID, @CourseID, @EnrollmentDate
+    FROM @StudentIDs;
+END;
+GO
+
+-- Stored Procedure to Generate Comprehensive Student Profile
+CREATE PROCEDURE GenerateStudentProfile
+    @StudentID INT
+AS
+BEGIN
+    -- Personal Details
+    SELECT 
+        FirstName,
+        LastName,
+        DateOfBirth,
+        Gender,
+        Email,
+        Phone,
+        Address,
+        EnrollmentDate
+    FROM Students
+    WHERE StudentID = @StudentID;
+
+    -- Enrollment Information
+    SELECT 
+        c.CourseName,
+        e.EnrollmentDate,
+        e.Grade,
+        c.Credits
+    FROM Enrollments e
+    JOIN Courses c ON e.CourseID = c.CourseID
+    WHERE e.StudentID = @StudentID
+    ORDER BY e.EnrollmentDate;
+
+    -- Calculate GPA
+    DECLARE @TotalCredits INT;
+    DECLARE @TotalPoints FLOAT;
+    DECLARE @GPA FLOAT;
+
+    SELECT 
+        @TotalCredits = SUM(c.Credits),
+        @TotalPoints = SUM(CASE
+            WHEN e.Grade = 'A' THEN 4.0 * c.Credits
+            WHEN e.Grade = 'A-' THEN 3.7 * c.Credits
+            WHEN e.Grade = 'B+' THEN 3.3 * c.Credits
+            WHEN e.Grade = 'B' THEN 3.0 * c.Credits
+            WHEN e.Grade = 'B-' THEN 2.7 * c.Credits
+            WHEN e.Grade = 'C+' THEN 2.3 * c.Credits
+            WHEN e.Grade = 'C' THEN 2.0 * c.Credits
+            WHEN e.Grade = 'C-' THEN 1.7 * c.Credits
+            WHEN e.Grade = 'D+' THEN 1.3 * c.Credits
+            WHEN e.Grade = 'D' THEN 1.0 * c.Credits
+            WHEN e.Grade = 'F' THEN 0.0 * c.Credits
+            ELSE 0.0
+        END)
+    FROM Enrollments e
+    JOIN Courses c ON e.CourseID = c.CourseID
+    WHERE e.StudentID = @StudentID;
+
+    SET @GPA = CASE
+        WHEN @TotalCredits = 0 THEN 0
+        ELSE @TotalPoints / @TotalCredits
+    END;
+
+    SELECT @GPA AS GPA;
+END;
+GO
+
+-- Stored Procedure to Assign Multiple Instructors to a Course
+CREATE PROCEDURE AssignInstructorsToCourse
+    @CourseID INT,
+    @InstructorIDs dbo.IntList READONLY,
+    @AssignmentDate DATE
+AS
+BEGIN
+    INSERT INTO CourseAssignments (CourseID, InstructorID, AssignmentDate)
+    SELECT @CourseID, InstructorID, @AssignmentDate
+    FROM @InstructorIDs;
+END;
+GO
+
+-- Stored Procedure to Retrieve Courses Taught by Instructor
+CREATE PROCEDURE GetCoursesTaughtByInstructor
+    @InstructorID INT,
+    @StartDate DATE,
+    @EndDate DATE
+AS
+BEGIN
+    SELECT 
+        c.CourseID,
+        c.CourseName,
+        cs.DayOfWeek,
+        cs.StartTime,
+        cs.EndTime
+    FROM CourseAssignments ca
+    JOIN Courses c ON ca.CourseID = c.CourseID
+    JOIN CourseSchedules cs ON c.CourseID = cs.CourseID
+    WHERE ca.InstructorID = @InstructorID
+      AND cs.StartDate >= @StartDate
+      AND cs.EndDate <= @EndDate
+    ORDER BY cs.StartDate;
+END;
+GO
+
+-- Stored Procedure to Track Course Material Distribution
+CREATE PROCEDURE TrackCourseMaterialDistribution
+    @CourseID INT,
+    @StudentID INT,
+    @MaterialName VARCHAR(255),
+    @DistributionDate DATE
+AS
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM CourseMaterials
+        WHERE CourseID = @CourseID
+          AND StudentID = @StudentID
+          AND MaterialName = @MaterialName
+    )
+    BEGIN
+        INSERT INTO CourseMaterials (CourseID, StudentID, MaterialName, DistributionDate)
+        VALUES (@CourseID, @StudentID, @MaterialName, @DistributionDate);
+        PRINT 'Material distributed successfully.';
+    END
+    ELSE
+    BEGIN
+        PRINT 'Material already distributed to this student.';
+    END
+END;
+GO
+
+-- Stored Procedure to Calculate Department GPA
+CREATE PROCEDURE CalculateDepartmentGPA
+    @DepartmentID INT
+AS
+BEGIN
+    DECLARE @TotalCredits INT;
+    DECLARE @TotalPoints FLOAT;
+    DECLARE @GPA FLOAT;
+
+    SELECT 
+        @TotalCredits = SUM(c.Credits),
+        @TotalPoints = SUM(CASE
+            WHEN e.Grade = 'A' THEN 4.0 * c.Credits
+            WHEN e.Grade = 'A-' THEN 3.7 * c.Credits
+            WHEN e.Grade = 'B+' THEN 3.3 * c.Credits
+            WHEN e.Grade = 'B' THEN 3.0 * c.Credits
+            WHEN e.Grade = 'B-' THEN 2.7 * c.Credits
+            WHEN e.Grade = 'C+' THEN 2.3 * c

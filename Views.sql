@@ -533,3 +533,26 @@ JOIN
 JOIN 
     Classrooms cl ON cs.ClassroomID = cl.ClassroomID;
 GO
+
+-- Create View_CourseDetails view
+CREATE VIEW View_CourseDetails AS
+SELECT
+    c.CourseID,
+    c.CourseName,
+    c.CourseDescription,
+    c.Credits,
+    d.DepartmentName,
+    i.FirstName AS InstructorFirstName,
+    i.LastName AS InstructorLastName,
+    cs.DayOfWeek,
+    cs.StartTime,
+    cs.EndTime,
+    cl.BuildingName,
+    cl.RoomNumber
+FROM
+    Courses c
+    JOIN Departments d ON c.DepartmentID = d.DepartmentID
+    JOIN CourseAssignments ca ON c.CourseID = ca.CourseID
+    JOIN Instructors i ON ca.InstructorID = i.InstructorID
+    JOIN CourseSchedules cs ON c.CourseID = cs.CourseID
+    JOIN Classrooms cl ON cs.ClassroomID = cl.ClassroomID;

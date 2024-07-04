@@ -1,7 +1,3 @@
-Certainly! Here is the complete documentation for your university database project, including the details of all tables, stored procedures, and additional information to help understand and use the database effectively.
-
----
-
 # University Database
 
 This project implements a comprehensive database for managing various aspects of a university. It includes tables for departments, students, instructors, courses, enrollments, classrooms, schedules, clubs, scholarships, research projects, alumni, library books, attendance, feedback, advisors, prerequisites, and employment records.

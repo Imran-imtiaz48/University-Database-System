@@ -103,7 +103,7 @@ CREATE TABLE DepartmentsInstructors (
 CREATE TABLE Degrees (
     DegreeID INT IDENTITY(1,1) PRIMARY KEY,
     DegreeName VARCHAR(100) NOT NULL,
-    Level VARCHAR(50) NOT NULL,  -- e.g., Bachelor's, Master's, PhD
+    Level VARCHAR(50) NOT NULL, 
     DepartmentID INT,
     FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
 );
@@ -189,7 +189,7 @@ CREATE TABLE ScholarshipApplications (
     ScholarshipID INT,
     StudentID INT,
     ApplicationDate DATE NOT NULL,
-    Status VARCHAR(50) NOT NULL,  -- e.g., Pending, Approved, Rejected
+    Status VARCHAR(50) NOT NULL,  
     FOREIGN KEY (ScholarshipID) REFERENCES Scholarships(ScholarshipID),
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
 );
@@ -267,7 +267,7 @@ CREATE TABLE ResearchTeamMembers (
     TeamMemberID INT IDENTITY(1,1) PRIMARY KEY,
     ProjectID INT,
     InstructorID INT,
-    Role VARCHAR(100) NOT NULL,  -- e.g., Principal Investigator, Co-Investigator
+    Role VARCHAR(100) NOT NULL,  
     FOREIGN KEY (ProjectID) REFERENCES ResearchProjects(ProjectID),
     FOREIGN KEY (InstructorID) REFERENCES Instructors(InstructorID)
 );

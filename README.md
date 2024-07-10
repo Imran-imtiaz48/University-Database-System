@@ -1,6 +1,6 @@
 # University Database
 
-This project entails the development of a robust database system designed to effectively manage diverse operational aspects within a university environment. Key components include tables for departments, students, instructors, course, enrollment, classrooms, schedules, clubs, scholarships, research projects, alumni, library resources, attendance tracking, feedback mechanisms, academic advisors, course prerequisites, and employment histories.
+This project involves creating a comprehensive database system to efficiently manage various operational aspects within a university setting. Key components include tables for departments, students, instructors, courses, enrollment, classrooms, schedules, clubs, scholarships, research projects, alumni, library resources, attendance tracking, feedback mechanisms, academic advisors, course prerequisites, and employment histories.
 
 ## Table of Contents
 

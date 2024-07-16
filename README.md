@@ -1,6 +1,6 @@
 # University Database
 
-This project involves creating a comprehensive database system to efficiently manage various operational aspects within a university setting. Key components include tables for departments, students, instructors, courses, enrollment, classrooms, schedules, clubs, scholarships, research projects, alumni, library resources, attendance tracking, feedback mechanisms, academic advisors, course prerequisites, and employment histories.
+This project aims to create a comprehensive database system for efficient management of various operational aspects within a university setting. The database encompasses tables for departments, students, instructors, courses, enrollment, classrooms, schedules, clubs, scholarships, research projects, alumni, library resources, attendance tracking, feedback mechanisms, academic advisors, course prerequisites, and employment histories.
 
 ## Table of Contents
 
@@ -231,19 +231,18 @@ This project involves creating a comprehensive database system to efficiently ma
 
 - **FeedbackID** (INT, Primary Key, Identity)
 - **StudentID** (INT, Foreign Key)
-- **CourseID
-
-** (INT, Foreign Key)
+- **CourseID** (INT, Foreign Key)
 - **InstructorID** (INT, Foreign Key)
-- **FeedbackDate** (DATE, NOT NULL)
+- **FeedbackDate** (DATE
+
+, NOT NULL)
 - **Comments** (TEXT)
-- **Rating** (INT, NOT NULL CHECK (Rating >= 1 AND Rating <= 5))
 
 #### StudentAdvisors
 
 - **AdvisorID** (INT, Primary Key, Identity)
 - **StudentID** (INT, Foreign Key)
-- **FacultyID** (INT, Foreign Key)
+- **InstructorID** (INT, Foreign Key)
 - **AssignmentDate** (DATE, NOT NULL)
 
 #### Prerequisites
@@ -255,32 +254,65 @@ This project involves creating a comprehensive database system to efficiently ma
 #### Employment
 
 - **EmploymentID** (INT, Primary Key, Identity)
-- **AlumniID** (INT, Foreign Key)
+- **StudentID** (INT, Foreign Key)
 - **EmployerName** (VARCHAR(100), NOT NULL)
-- **Position** (VARCHAR(100), NOT NULL)
+- **JobTitle** (VARCHAR(100), NOT NULL)
 - **StartDate** (DATE, NOT NULL)
 - **EndDate** (DATE)
-- **Salary** (DECIMAL(10, 2))
+- **JobDescription** (TEXT)
 
 ## Stored Procedures
 
 ### GetStudentDetails
-
-Fetches details of a student by StudentID.
+Retrieves detailed information about a student, including personal details, enrolled courses, and club memberships.
 
 ```sql
 CREATE PROCEDURE GetStudentDetails
     @StudentID INT
 AS
 BEGIN
-    SELECT * FROM Students WHERE StudentID = @StudentID;
+    SELECT 
+        S.StudentID, 
+        S.FirstName, 
+        S.LastName, 
+        S.DateOfBirth, 
+        S.Gender, 
+        S.Email, 
+        S.Phone, 
+        S.Address, 
+        S.EnrollmentDate, 
+        D.DepartmentName
+    FROM 
+        Students S
+        INNER JOIN Departments D ON S.DepartmentID = D.DepartmentID
+    WHERE 
+        S.StudentID = @StudentID;
+
+    SELECT 
+        E.CourseID, 
+        C.CourseName, 
+        E.EnrollmentDate, 
+        E.Grade
+    FROM 
+        Enrollments E
+        INNER JOIN Courses C ON E.CourseID = C.CourseID
+    WHERE 
+        E.StudentID = @StudentID;
+
+    SELECT 
+        CM.ClubID, 
+        C.ClubName, 
+        CM.MembershipDate
+    FROM 
+        ClubMemberships CM
+        INNER JOIN Clubs C ON CM.ClubID = C.ClubID
+    WHERE 
+        CM.StudentID = @StudentID;
 END;
-GO
 ```
 
 ### AddNewStudent
-
-Adds a new student to the Students table.
+Inserts a new student record into the Students table.
 
 ```sql
 CREATE PROCEDURE AddNewStudent
@@ -298,45 +330,51 @@ BEGIN
     INSERT INTO Students (FirstName, LastName, DateOfBirth, Gender, Email, Phone, Address, EnrollmentDate, DepartmentID)
     VALUES (@FirstName, @LastName, @DateOfBirth, @Gender, @Email, @Phone, @Address, @EnrollmentDate, @DepartmentID);
 END;
-GO
 ```
 
 ### GetInstructorCourses
-
-Fetches courses taught by an instructor.
+Retrieves all courses taught by a specific instructor.
 
 ```sql
 CREATE PROCEDURE GetInstructorCourses
     @InstructorID INT
 AS
 BEGIN
-    SELECT Courses.CourseID, Courses.CourseName, Courses.Credits
-    FROM Courses
-    INNER JOIN CourseAssignments ON Courses.CourseID = CourseAssignments.CourseID
-    WHERE CourseAssignments.InstructorID = @InstructorID;
+    SELECT 
+        CA.CourseID, 
+        C.CourseName, 
+        CA.AssignmentDate
+    FROM 
+        CourseAssignments CA
+        INNER JOIN Courses C ON CA.CourseID = C.CourseID
+    WHERE 
+        CA.InstructorID = @InstructorID;
 END;
-GO
 ```
 
 ### GetCourseEnrollments
-
-Fetches students enrolled in a course.
+Retrieves all students enrolled in a specific course.
 
 ```sql
 CREATE PROCEDURE GetCourseEnrollments
     @CourseID INT
 AS
 BEGIN
-    SELECT Students.StudentID, Students.FirstName, Students.LastName, Enrollments.Grade
-    FROM Enrollments
-    INNER JOIN Students ON Enrollments.StudentID = Students.StudentID
-    WHERE Enrollments.CourseID = @CourseID;
+    SELECT 
+        E.StudentID, 
+        S.FirstName, 
+        S.LastName, 
+        E.EnrollmentDate, 
+        E.Grade
+    FROM 
+        Enrollments E
+        INNER JOIN Students S ON E.StudentID = S.StudentID
+    WHERE 
+        E.CourseID = @CourseID;
 END;
-GO
 ```
 
 ### AddCourseEnrollment
-
 Enrolls a student in a course.
 
 ```sql
@@ -349,11 +387,9 @@ BEGIN
     INSERT INTO Enrollments (StudentID, CourseID, EnrollmentDate)
     VALUES (@StudentID, @CourseID, @EnrollmentDate);
 END;
-GO
 ```
 
 ### AddInstructorToCourse
-
 Assigns an instructor to a course.
 
 ```sql
@@ -366,61 +402,75 @@ BEGIN
     INSERT INTO CourseAssignments (InstructorID, CourseID, AssignmentDate)
     VALUES (@InstructorID, @CourseID, @AssignmentDate);
 END;
-GO
 ```
 
 ### GetStudentEnrollmentHistory
-
-Fetches enrollment history of a student.
+Retrieves a student's enrollment history.
 
 ```sql
 CREATE PROCEDURE GetStudentEnrollmentHistory
     @StudentID INT
 AS
 BEGIN
-    SELECT Courses.CourseName, Enrollments.EnrollmentDate, Enrollments.Grade
-    FROM Enrollments
-    INNER JOIN Courses ON Enrollments.CourseID = Courses.CourseID
-    WHERE Enrollments.StudentID = @StudentID;
+    SELECT 
+        E.CourseID, 
+        C.CourseName, 
+        E.EnrollmentDate, 
+        E.Grade
+    FROM 
+        Enrollments E
+        INNER JOIN Courses C ON E.CourseID = C.CourseID
+    WHERE 
+        E.StudentID = @StudentID;
 END;
-GO
 ```
 
 ### GetCourseSchedule
-
-Fetches schedule of a course.
+Retrieves the schedule for a specific course.
 
 ```sql
 CREATE PROCEDURE GetCourseSchedule
     @CourseID INT
 AS
 BEGIN
-    SELECT CourseSchedules.DayOfWeek, CourseSchedules.StartTime, CourseSchedules.EndTime, Classrooms.BuildingName, Classrooms.RoomNumber
-    FROM CourseSchedules
-    INNER JOIN Classrooms ON CourseSchedules.ClassroomID = Classrooms.ClassroomID
-    WHERE CourseSchedules.CourseID = @CourseID;
+    SELECT 
+        CS.DayOfWeek, 
+        CS.StartTime, 
+        CS.EndTime, 
+        CL.BuildingName, 
+        CL.RoomNumber
+    FROM 
+        CourseSchedules CS
+        INNER JOIN Classrooms CL ON CS.ClassroomID = CL.ClassroomID
+    WHERE 
+        CS.CourseID = @CourseID;
 END;
-GO
 ```
 
 ### GetDepartmentInstructors
-
-Fetches instructors in a department.
+Retrieves all instructors in a specific department.
 
 ```sql
 CREATE PROCEDURE GetDepartmentInstructors
     @DepartmentID INT
 AS
 BEGIN
-    SELECT Instructors.InstructorID, Instructors.FirstName, Instructors.LastName, Instructors.Email
-    FROM Instructors
-    WHERE Instructors.DepartmentID = @DepartmentID;
+    SELECT 
+        DI.InstructorID, 
+        I.FirstName, 
+        I.LastName, 
+        I.Email, 
+        I.Phone, 
+        I.HireDate
+    FROM 
+        DepartmentsInstructors DI
+        INNER JOIN Instructors I ON DI.InstructorID = I.InstructorID
+    WHERE 
+        DI.DepartmentID = @DepartmentID;
 END;
-GO
 ```
 
 ### AddClubMembership
-
 Adds a student to a club.
 
 ```sql
@@ -433,28 +483,29 @@ BEGIN
     INSERT INTO ClubMemberships (StudentID, ClubID, MembershipDate)
     VALUES (@StudentID, @ClubID, @MembershipDate);
 END;
-GO
 ```
 
 ### GetStudentClubMemberships
-
-Fetches club memberships of a student.
+Retrieves all club memberships for a specific student.
 
 ```sql
 CREATE PROCEDURE GetStudentClubMemberships
     @StudentID INT
 AS
 BEGIN
-    SELECT Clubs.ClubName, ClubMemberships.MembershipDate
-    FROM ClubMemberships
-    INNER JOIN Clubs ON ClubMemberships.ClubID = Clubs.ClubID
-    WHERE ClubMemberships.StudentID = @StudentID;
+    SELECT 
+        CM.ClubID, 
+        C.ClubName, 
+        CM.MembershipDate
+    FROM 
+        ClubMemberships CM
+        INNER JOIN Clubs C ON CM.ClubID = C.ClubID
+    WHERE 
+        CM.StudentID = @StudentID;
 END;
-GO
 ```
 
 ### AddScholarshipApplication
-
 Submits a scholarship application for a student.
 
 ```sql
@@ -468,28 +519,30 @@ BEGIN
     INSERT INTO ScholarshipApplications (StudentID, ScholarshipID, ApplicationDate, Status)
     VALUES (@StudentID, @ScholarshipID, @ApplicationDate, @Status);
 END;
-GO
 ```
 
 ### GetScholarshipApplications
-
-Fetches scholarship applications of a student.
+Retrieves all scholarship applications for a specific student.
 
 ```sql
 CREATE PROCEDURE GetScholarshipApplications
     @StudentID INT
 AS
 BEGIN
-    SELECT Scholarships.ScholarshipName, ScholarshipApplications.ApplicationDate, ScholarshipApplications.Status
-    FROM ScholarshipApplications
-    INNER JOIN Scholarships ON ScholarshipApplications.ScholarshipID = Scholarships.ScholarshipID
-    WHERE ScholarshipApplications.StudentID = @StudentID;
+    SELECT 
+        SA.ScholarshipID, 
+        S.ScholarshipName, 
+        SA.ApplicationDate, 
+        SA.Status
+    FROM 
+        ScholarshipApplications SA
+        INNER JOIN Scholarships S ON SA.ScholarshipID = S.ScholarshipID
+    WHERE 
+        SA.StudentID = @StudentID;
 END;
-GO
 ```
 
 ### AddResearchTeamMember
-
 Adds a faculty member to a research project.
 
 ```sql
@@ -502,29 +555,32 @@ BEGIN
     INSERT INTO ResearchTeamMembers (FacultyID, ProjectID, AssignmentDate)
     VALUES (@FacultyID, @ProjectID, @AssignmentDate);
 END;
-GO
 ```
 
 ### GetResearchProjectTeamMembers
-
-Fetches team members of a research project.
+Retrieves all team members of a specific research project.
 
 ```sql
 CREATE PROCEDURE GetResearchProjectTeamMembers
     @ProjectID INT
 AS
 BEGIN
-    SELECT Instructors.FirstName, Instructors.LastName, ResearchTeamMembers.AssignmentDate
-    FROM ResearchTeamMembers
-    INNER JOIN Instructors ON ResearchTeamMembers.FacultyID = Instructors.InstructorID
-    WHERE ResearchTeamMembers.ProjectID = @ProjectID;
+    SELECT 
+        RTM.FacultyID, 
+        F.FirstName, 
+        F.LastName, 
+        F.Email, 
+        RTM.AssignmentDate
+    FROM 
+        ResearchTeamMembers RTM
+        INNER JOIN Faculty F ON RTM.FacultyID = F.FacultyID
+    WHERE 
+        RTM.ProjectID = @ProjectID;
 END;
-GO
 ```
 
 ### AddAlumniDonation
-
-Records a donation from an alumnus.
+Records a donation made by an alumni.
 
 ```sql
 CREATE PROCEDURE AddAlumniDonation
@@ -537,150 +593,28 @@ BEGIN
     INSERT INTO Donations (AlumniID, DonationAmount, DonationDate, Purpose)
     VALUES (@AlumniID, @DonationAmount, @DonationDate, @Purpose);
 END;
-GO
 ```
 
 ### GetAlumniDonations
-
-Fetches donations made by an alumnus.
+Retrieves all donations made by a specific alumni.
 
 ```sql
 CREATE PROCEDURE GetAlumniDonations
     @AlumniID INT
 AS
 BEGIN
-    SELECT Donations.DonationAmount, Donations.DonationDate, Donations.Purpose
-    FROM Donations
-    WHERE Donations.AlumniID = @AlumniID;
+    SELECT 
+        D.DonationID, 
+        D.D
+
+onationAmount, 
+        D.DonationDate, 
+        D.Purpose
+    FROM 
+        Donations D
+    WHERE 
+        D.AlumniID = @AlumniID;
 END;
-GO
 ```
 
-### LoanLibraryBook
-
-Records a library book loan.
-
-```sql
-CREATE PROCEDURE LoanLibraryBook
-    @BookID INT,
-    @StudentID INT,
-    @LoanDate DATE
-AS
-BEGIN
-    INSERT INTO BookLoans (BookID, StudentID, LoanDate, Status)
-    VALUES (@BookID, @StudentID, @LoanDate, 'Loaned');
-END;
-GO
-```
-
-### ReturnLibraryBook
-
-Records the return of a library book.
-
-```sql
-CREATE PROCEDURE ReturnLibraryBook
-    @LoanID INT,
-    @ReturnDate DATE
-AS
-BEGIN
-    UPDATE BookLoans
-    SET ReturnDate = @ReturnDate, Status = 'Returned'
-    WHERE LoanID = @LoanID;
-END;
-GO
-```
-
-### RecordAttendance
-
-Records attendance for a student in a course.
-
-```sql
-CREATE PROCEDURE RecordAttendance
-    @StudentID INT,
-    @CourseID INT,
-    @AttendanceDate DATE,
-    @Status VARCHAR(50)
-AS
-BEGIN
-    INSERT INTO Attendance (StudentID, CourseID, AttendanceDate, Status)
-    VALUES (@StudentID, @CourseID, @AttendanceDate, @Status);
-END;
-GO
-```
-
-### SubmitCourse
-
-Feedback
-
-Submits feedback for a course by a student.
-
-```sql
-CREATE PROCEDURE SubmitCourseFeedback
-    @StudentID INT,
-    @CourseID INT,
-    @InstructorID INT,
-    @FeedbackDate DATE,
-    @Comments TEXT,
-    @Rating INT
-AS
-BEGIN
-    INSERT INTO Feedback (StudentID, CourseID, InstructorID, FeedbackDate, Comments, Rating)
-    VALUES (@StudentID, @CourseID, @InstructorID, @FeedbackDate, @Comments, @Rating);
-END;
-GO
-```
-
-### AssignStudentAdvisor
-
-Assigns an advisor to a student.
-
-```sql
-CREATE PROCEDURE AssignStudentAdvisor
-    @StudentID INT,
-    @FacultyID INT,
-    @AssignmentDate DATE
-AS
-BEGIN
-    INSERT INTO StudentAdvisors (StudentID, FacultyID, AssignmentDate)
-    VALUES (@StudentID, @FacultyID, @AssignmentDate);
-END;
-GO
-```
-
-### AddCoursePrerequisite
-
-Adds a prerequisite to a course.
-
-```sql
-CREATE PROCEDURE AddCoursePrerequisite
-    @CourseID INT,
-    @PrerequisiteCourseID INT
-AS
-BEGIN
-    INSERT INTO Prerequisites (CourseID, PrerequisiteCourseID)
-    VALUES (@CourseID, @PrerequisiteCourseID);
-END;
-GO
-```
-
-### AddEmploymentRecord
-
-Adds an employment record for an alumnus.
-
-```sql
-CREATE PROCEDURE AddEmploymentRecord
-    @AlumniID INT,
-    @EmployerName VARCHAR(100),
-    @Position VARCHAR(100),
-    @StartDate DATE,
-    @EndDate DATE,
-    @Salary DECIMAL(10, 2)
-AS
-BEGIN
-    INSERT INTO Employment (AlumniID, EmployerName, Position, StartDate, EndDate, Salary)
-    VALUES (@AlumniID, @EmployerName, @Position, @StartDate, @EndDate, @Salary);
-END;
-GO
-```
-
-
+This schema and set of procedures should cover a broad range of functionalities for the university database management system. Adjustments and additions can be made based on specific needs and requirements.

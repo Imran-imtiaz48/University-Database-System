@@ -1,6 +1,3 @@
-Certainly! Here's a comprehensive SQL script that includes several stored procedures for managing various aspects of a university's database system. This script covers procedures for retrieving schedules, calculating averages, generating reports, managing course schedules, assigning students to dormitories, and more. Each stored procedure fulfills a specific function within the university's administrative operations.
-
-```sql
 -- Stored Procedure to Get Instructor's Schedule
 CREATE PROCEDURE GetInstructorSchedule
     @InstructorID INT
@@ -339,4 +336,4 @@ BEGIN
     SELECT @AverageGrade AS DepartmentAverageGrade;
 END;
 GO
-```
+

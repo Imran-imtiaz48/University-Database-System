@@ -617,4 +617,4 @@ onationAmount,
 END;
 ```
 
-This schema and set of procedures should cover a broad range of functionalities for the university database management system. Adjustments and additions can be made based on specific needs and requirements.
+This schema and set of procedures are designed to cover a wide range of functionalities for the university database management system. Adjustments and additions can be made to accommodate specific needs and requirements.

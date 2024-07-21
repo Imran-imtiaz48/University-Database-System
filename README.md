@@ -1,6 +1,6 @@
 # University Database
 
-This project aims to develop a comprehensive university database system designed to streamline and enhance various operational aspects. The database will encompass essential tables for departments, students, instructors, courses, enrollment, classrooms, schedules, clubs, scholarships, research projects, alumni, library resources, attendance tracking, feedback mechanisms, academic advisors, course prerequisites, and employment histories. By integrating these components, the system seeks to optimize administrative efficiency, improve data accessibility, and support informed decision-making across academic and administrative functions within the university.
+This project aims to build a powerful database system that connects departments, students, instructors, and more. It will manage everything from courses and enrollment to clubs and alumni. This one-stop shop will boost efficiency for administrators, make data readily available, and empower informed decisions across the university.
 
 ## Table of Contents
 

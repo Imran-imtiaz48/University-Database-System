@@ -1,6 +1,6 @@
 # University Database
 
-This project aims to build a powerful database system that connects departments, students, instructors, and more. It will manage everything from courses and enrollment to clubs and alumni. This one-stop shop will boost efficiency for administrators, make data readily available, and empower informed decisions across the university.
+This initiative proposes the development of a robust, integrated database system for a university environment.  The system will facilitate seamless connectivity between departments, students, instructors, and other relevant stakeholders.  It will encompass comprehensive management of academic data, including courses, enrollment, as well as co-curricular activities like clubs and alumni relations.  This centralized platform aims to enhance administrative efficiency, ensure data accessibility, and empower informed decision-making across the university.
 
 ## Table of Contents
 

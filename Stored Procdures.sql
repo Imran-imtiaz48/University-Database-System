@@ -26,18 +26,18 @@ AS
 BEGIN
     DECLARE @AverageGrade FLOAT;
 
-    SELECT @AverageGrade = AVG(CASE
-        WHEN Grade = 'A' THEN 4.0
-        WHEN Grade = 'A-' THEN 3.7
-        WHEN Grade = 'B+' THEN 3.3
-        WHEN Grade = 'B' THEN 3.0
-        WHEN Grade = 'B-' THEN 2.7
-        WHEN Grade = 'C+' THEN 2.3
-        WHEN Grade = 'C' THEN 2.0
-        WHEN Grade = 'C-' THEN 1.7
-        WHEN Grade = 'D+' THEN 1.3
-        WHEN Grade = 'D' THEN 1.0
-        WHEN Grade = 'F' THEN 0.0
+    SELECT @AverageGrade = AVG(CASE Grade
+        WHEN 'A' THEN 4.0
+        WHEN 'A-' THEN 3.7
+        WHEN 'B+' THEN 3.3
+        WHEN 'B' THEN 3.0
+        WHEN 'B-' THEN 2.7
+        WHEN 'C+' THEN 2.3
+        WHEN 'C' THEN 2.0
+        WHEN 'C-' THEN 1.7
+        WHEN 'D+' THEN 1.3
+        WHEN 'D' THEN 1.0
+        WHEN 'F' THEN 0.0
         ELSE NULL
     END)
     FROM Enrollments e
@@ -77,18 +77,18 @@ BEGIN
 
     -- GPA Calculation
     DECLARE @GPA FLOAT;
-    SELECT @GPA = AVG(CASE
-        WHEN Grade = 'A' THEN 4.0
-        WHEN Grade = 'A-' THEN 3.7
-        WHEN Grade = 'B+' THEN 3.3
-        WHEN Grade = 'B' THEN 3.0
-        WHEN Grade = 'B-' THEN 2.7
-        WHEN Grade = 'C+' THEN 2.3
-        WHEN Grade = 'C' THEN 2.0
-        WHEN Grade = 'C-' THEN 1.7
-        WHEN Grade = 'D+' THEN 1.3
-        WHEN Grade = 'D' THEN 1.0
-        WHEN Grade = 'F' THEN 0.0
+    SELECT @GPA = AVG(CASE Grade
+        WHEN 'A' THEN 4.0
+        WHEN 'A-' THEN 3.7
+        WHEN 'B+' THEN 3.3
+        WHEN 'B' THEN 3.0
+        WHEN 'B-' THEN 2.7
+        WHEN 'C+' THEN 2.3
+        WHEN 'C' THEN 2.0
+        WHEN 'C-' THEN 1.7
+        WHEN 'D+' THEN 1.3
+        WHEN 'D' THEN 1.0
+        WHEN 'F' THEN 0.0
         ELSE NULL
     END)
     FROM Enrollments
@@ -118,7 +118,8 @@ BEGIN
     BEGIN
         -- Update existing schedule
         UPDATE CourseSchedules
-        SET CourseID = @CourseID,
+        SET 
+            CourseID = @CourseID,
             ClassroomID = @ClassroomID,
             DayOfWeek = @DayOfWeek,
             StartTime = @StartTime,
@@ -311,22 +312,20 @@ BEGIN
     WHERE di.DepartmentID = @DepartmentID;
 
     -- Department Average Grade
-    DECLARE @AverageGrade FLOAT
+    DECLARE @AverageGrade FLOAT;
 
-;
-
-    SELECT @AverageGrade = AVG(CASE
-        WHEN e.Grade = 'A' THEN 4.0
-        WHEN e.Grade = 'A-' THEN 3.7
-        WHEN e.Grade = 'B+' THEN 3.3
-        WHEN e.Grade = 'B' THEN 3.0
-        WHEN e.Grade = 'B-' THEN 2.7
-        WHEN e.Grade = 'C+' THEN 2.3
-        WHEN e.Grade = 'C' THEN 2.0
-        WHEN e.Grade = 'C-' THEN 1.7
-        WHEN e.Grade = 'D+' THEN 1.3
-        WHEN e.Grade = 'D' THEN 1.0
-        WHEN e.Grade = 'F' THEN 0.0
+    SELECT @AverageGrade = AVG(CASE Grade
+        WHEN 'A' THEN 4.0
+        WHEN 'A-' THEN 3.7
+        WHEN 'B+' THEN 3.3
+        WHEN 'B' THEN 3.0
+        WHEN 'B-' THEN 2.7
+        WHEN 'C+' THEN 2.3
+        WHEN 'C' THEN 2.0
+        WHEN 'C-' THEN 1.7
+        WHEN 'D+' THEN 1.3
+        WHEN 'D' THEN 1.0
+        WHEN 'F' THEN 0.0
         ELSE NULL
     END)
     FROM Enrollments e
@@ -336,4 +335,3 @@ BEGIN
     SELECT @AverageGrade AS DepartmentAverageGrade;
 END;
 GO
-

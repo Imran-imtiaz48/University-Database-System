@@ -1,6 +1,6 @@
 # University Database
 
-This initiative proposes the development of a robust, integrated database system for a university environment.  The system will facilitate seamless connectivity between departments, students, instructors, and other relevant stakeholders.  It will encompass comprehensive management of academic data, including courses, enrollment, as well as co-curricular activities like clubs and alumni relations.  This centralized platform aims to enhance administrative efficiency, ensure data accessibility, and empower informed decision-making across the university.
+This initiative aims to develop a comprehensive and integrated database system for a university environment. The proposed system will seamlessly connect departments, students, instructors, and other relevant stakeholders. By encompassing the management of academic data such as courses and enrollment, as well as co-curricular activities like clubs and alumni relations, this centralized platform will enhance administrative efficiency, ensure data accessibility, and empower informed decision-making across the university.
 
 ## Table of Contents
 

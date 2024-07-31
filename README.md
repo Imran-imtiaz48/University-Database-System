@@ -4,7 +4,7 @@ Key Features:
 •	Management of course details, schedules, and prerequisites.
 •	Integration with classrooms and resource management.
 2. Enrollment and Academic Records:
-•	Seamless enrollment processes.
+•	Seamless enrollment processe.
 •	Real-time access to academic records and grades.
 •	GPA and academic performance tracking.
 3. Instructor and Student Management:

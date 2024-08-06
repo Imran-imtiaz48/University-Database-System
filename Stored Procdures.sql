@@ -1,4 +1,4 @@
--- Stored Procedure to Get Instructor's Schedules
+-- Stored Procedure to Get Instructor's Schedule
 CREATE PROCEDURE GetInstructorSchedule
     @InstructorID INT
 AS

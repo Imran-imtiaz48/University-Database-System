@@ -1,4 +1,4 @@
--- Create the university database Systems
+-- Create the university database System
 CREATE DATABASE university;
 GO
 

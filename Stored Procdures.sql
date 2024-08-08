@@ -3,6 +3,8 @@ CREATE PROCEDURE GetInstructorSchedule
     @InstructorID INT
 AS
 BEGIN
+    SET NOCOUNT ON;
+    
     SELECT 
         c.CourseName,
         cs.DayOfWeek,
@@ -24,6 +26,8 @@ CREATE PROCEDURE CalculateDepartmentAverageGrade
     @DepartmentID INT
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     DECLARE @AverageGrade FLOAT;
 
     SELECT @AverageGrade = AVG(CASE Grade
@@ -53,6 +57,8 @@ CREATE PROCEDURE GenerateStudentReport
     @StudentID INT
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     -- Student Details
     SELECT 
         FirstName,
@@ -108,6 +114,8 @@ CREATE PROCEDURE ManageCourseSchedule
     @EndTime TIME
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     IF @ScheduleID IS NULL
     BEGIN
         -- Insert new schedule
@@ -133,6 +141,8 @@ GO
 CREATE PROCEDURE GenerateFinancialAidReport
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     SELECT 
         s.FirstName,
         s.LastName,
@@ -155,6 +165,8 @@ CREATE PROCEDURE AssignStudentToDormitory
     @RoomNumber VARCHAR(10)
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     DECLARE @CurrentOccupancy INT;
     DECLARE @RoomCapacity INT;
 
@@ -186,6 +198,8 @@ CREATE PROCEDURE GetResearchProjectDetails
     @ProjectID INT
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     -- Project Details
     SELECT 
         ProjectName,
@@ -212,9 +226,11 @@ CREATE PROCEDURE AddCourseWithPrerequisites
     @CourseDescription TEXT,
     @Credits INT,
     @DepartmentID INT,
-    @Prerequisites TABLE (PrerequisiteCourseID INT)
+    @Prerequisites PrerequisiteTableType READONLY
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     DECLARE @CourseID INT;
 
     -- Insert new course
@@ -236,6 +252,8 @@ CREATE PROCEDURE GetCourseEnrollmentDetails
     @CourseID INT
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     SELECT 
         s.StudentID,
         s.FirstName,
@@ -261,6 +279,8 @@ CREATE PROCEDURE UpdateStudentInfo
     @Address VARCHAR(255)
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     UPDATE Students
     SET
         FirstName = @FirstName,
@@ -279,6 +299,8 @@ CREATE PROCEDURE GetCoursePrerequisites
     @CourseID INT
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     SELECT 
         p.PrerequisiteCourseID,
         c.CourseName
@@ -293,6 +315,8 @@ CREATE PROCEDURE GenerateDepartmentReport
     @DepartmentID INT
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     -- Department Courses
     SELECT 
         CourseID,

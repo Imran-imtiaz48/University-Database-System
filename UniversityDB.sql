@@ -54,7 +54,7 @@ CREATE TABLE Courses (
 );
 GO
 
--- Create the Enrollments table
+-- Create the Enrollment table
 CREATE TABLE Enrollments (
     EnrollmentID INT IDENTITY(1,1) PRIMARY KEY,
     StudentID INT,

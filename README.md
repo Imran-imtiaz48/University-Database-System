@@ -1,4 +1,4 @@
-This initiative aims to develop a comprehensive and integrated database system for a university environment. The proposed system will seamlessly connect departments, students, instructors, and other relevant stakeholders. By encompassing the  of academic data such as courses and enrollment, as well as co-curricular activities like clubs and alumni relations, this centralized platform will enhance administrative efficiency, ensure data accessibility, and empower informed decision-making across the university.
+The initiative aims to develop a comprehensive and integrated database system for a university environment. The proposed system will seamlessly connect departments, students, instructors, and other relevant stakeholders. By encompassing the  of academic data such as courses and enrollment, as well as co-curricular activities like clubs and alumni relations, this centralized platform will enhance administrative efficiency, ensure data accessibility, and empower informed decision-making across the university.
 Key Features:
 1. Comprehensive Course Management:
 •	Management of course details, schedules, and prerequisites.
